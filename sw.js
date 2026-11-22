@@ -1,6 +1,6 @@
 // 离线缓存：没网络时也能打开行程、日语和记账。改了文件就把版本号 +1。
-const CACHE = "snow-onsen-v1";
-const FILES = ["./", "index.html", "app.js", "data.js", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
+const CACHE = "snow-onsen-v2";
+const FILES = ["./", "index.html", "app.js", "data.js?v=2", "app.js?v=2", "data.js", "manifest.webmanifest", "icon.svg", "icon-180.png", "icon-192.png", "icon-512.png"];
 self.addEventListener("install", e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES))); self.skipWaiting(); });
 self.addEventListener("activate", e => { e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k))))); self.clients.claim(); });
 self.addEventListener("fetch", e => {

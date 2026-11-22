@@ -1,13 +1,13 @@
 (() => {
 const T = window.TRIP;
 const $ = (s, el = document) => el.querySelector(s);
-const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
 // ---------- Saved state (stays on this phone) ----------
 const KEY = "snowOnsenTrip.v1";
 const defaults = { lang: "zh", cur: "JPY", rate: 2.9, flights: {}, stays: {}, visited: {}, expenses: [], tab: "plan", day: null };
-let S = { ...defaults };
-try { S = { ...defaults, ...JSON.parse(localStorage.getItem(KEY) || "{}") }; } catch (e) {}
+let S = Object.assign({}, defaults);
+try { S = Object.assign({}, defaults, JSON.parse(localStorage.getItem(KEY) || "{}")); } catch (e) {}
 const save = () => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) {} };
 
 // ---------- Words ----------
@@ -47,8 +47,8 @@ const W = {
     installTitle: "Add to Home Screen", installHint: "iPhone: open in Safari → Share → \"Add to Home Screen\". Android: Chrome menu → \"Install app\".",
     today: "Today" },
 };
-const w = (k, n) => { const v = W[S.lang][k] ?? k; return n == null ? v : v.replace("{n}", n); };
-const t = o => (o && typeof o === "object") ? (o[S.lang] ?? o.zh) : (o ?? "");
+const w = (k, n) => { const v = W[S.lang][k] != null ? W[S.lang][k] : k; return n == null ? v : v.replace("{n}", n); };
+const t = o => (o && typeof o === "object") ? (o[S.lang] != null ? o[S.lang] : o.zh) : (o == null ? "" : o);
 
 // ---------- Money ----------
 const toJPY = (amt, cur) => cur === "RM" ? amt / S.rate * 100 : amt;
@@ -131,8 +131,8 @@ function stayCard(st, idx) {
       <button class="ghost-btn" type="button" data-editstay="${st.id}">${booked ? w("edit") : w("enterBooking")}</button>
     </div>
     <form class="inline-form" data-stayform="${st.id}" hidden>
-      <div class="field"><label for="hn-${st.id}-${idx ?? "x"}">${w("hotelName")}</label><input id="hn-${st.id}-${idx ?? "x"}" name="name" value="${esc(mine.name || "")}"></div>
-      <div class="field"><label for="ha-${st.id}-${idx ?? "x"}">${w("hotelAddr")}</label><input id="ha-${st.id}-${idx ?? "x"}" name="addr" value="${esc(mine.addr || "")}"></div>
+      <div class="field"><label for="hn-${st.id}-${idx == null ? "x" : idx}">${w("hotelName")}</label><input id="hn-${st.id}-${idx == null ? "x" : idx}" name="name" value="${esc(mine.name || "")}"></div>
+      <div class="field"><label for="ha-${st.id}-${idx == null ? "x" : idx}">${w("hotelAddr")}</label><input id="ha-${st.id}-${idx == null ? "x" : idx}" name="addr" value="${esc(mine.addr || "")}"></div>
       <div class="row"><button class="ghost-btn" type="button" data-cancelstay="${st.id}">${w("cancel")}</button><button class="primary" type="submit">${w("saveBtn")}</button></div>
     </form>
   </div>`;
@@ -382,7 +382,7 @@ document.addEventListener("submit", e => {
     render(); toast(w("added"));
   } else if (f.id === "settingsForm") {
     const r = parseFloat($("#rate").value); if (r > 0) S.rate = r;
-    f.querySelectorAll("[data-fl]").forEach(inp => { S.flights[inp.dataset.fl] = { ...(S.flights[inp.dataset.fl] || {}), [inp.dataset.k]: inp.value }; });
+    f.querySelectorAll("[data-fl]").forEach(inp => { S.flights[inp.dataset.fl] = Object.assign({}, S.flights[inp.dataset.fl] || {}, { [inp.dataset.k]: inp.value }); });
     $("#sheetRoot").innerHTML = ""; render(); toast(w("savedT"));
   } else if (f.dataset.stayform) {
     S.stays[f.dataset.stayform] = { name: f.name.value.trim(), addr: f.addr.value.trim() };
